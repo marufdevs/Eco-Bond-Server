@@ -1,5 +1,5 @@
 import express from "express"
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import 'dotenv/config'
 import cors from 'cors'
 const app = express()
@@ -43,6 +43,25 @@ app.get('/all-events', async (req, res) => {
         res.status(500).json({ message: "Failed to load events" });
     }
 })
+
+//single event Get Api
+app.get('/event/:id', async (req, res) => {
+    try {
+        const event = await allEvents.findOne({
+            _id: new ObjectId(req.params.id),
+            status: "published",
+        });
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+        res.send(event);
+    } catch (error) {
+        console.error("Failed to load event:", error);
+        res.status(400).json({ message: "Invalid event id" });
+    }
+})
+
+//single event Post Api
 app.post('/new-event', async (req, res) => {
     try {
         const result = await allEvents.insertOne(req.body)
